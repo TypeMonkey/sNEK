@@ -13,7 +13,6 @@ import jg.cs.common.FunctionSignature;
 import jg.cs.common.OperatorKind;
 import jg.cs.common.Type;
 import jg.cs.compile.Program;
-import jg.cs.compile.errors.TypeMismatchException;
 import jg.cs.compile.errors.UnresolvableComponentException;
 import jg.cs.compile.nodes.BinaryOpExpr;
 import jg.cs.compile.nodes.Expr;

@@ -22,20 +22,37 @@ import net.percederberg.grammatica.parser.Tokenizer;
 
 public class Main {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     if (args.length == 1 && getFileExtension(args[0]).equals("snek")) {
       File targetFile = new File(args[0]);
       if (targetFile.exists() && targetFile.canRead()) {
-        List<Token> tokens = tokenizeSource(targetFile);
+        
+        List<Token> tokens = null;
+        try {
+          tokens = tokenizeSource(targetFile);
+        } catch (FileNotFoundException e) {
+          System.err.println("sNEK: Provided source file is either nonexistant or unreadble!");
+          System.exit(-1);
+        } catch (ParseException e) {
+          System.err.println("sNEK: "+e.getMessage());
+          System.exit(-1);
+        }
+        
         if (tokens == null) {
           System.err.println("Fatal Error: Couldn't create tokenizer! Exiting....");
           System.exit(-1);
         }
 
-        //System.out.println("ALL: "+tokens);
         System.out.println("sNEK Interpreter v1.0");
         System.out.println("-------------PARSING------------");
-        List<Expr> components = parse(tokens);
+        List<Expr> components = null;
+        try {
+          components = parse(tokens);
+        } catch (ParserLogException e) {
+          System.err.println("sNEK: "+e.getMessage());
+          System.exit(-1);
+        }
+        
         if (components == null) {
           System.err.println("Fatal Error: Couldn't create parser! Exiting....");
           System.exit(-1);
