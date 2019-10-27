@@ -41,14 +41,14 @@ public class ExprBuilder extends CopperHeadAnalyzer{
   @Override
   protected Node exitInteger(Token node) throws ParseException {
     actualNodes.push(new Int(node));
-    System.out.println(" --->Enter Integer");
+    //System.out.println(" --->Enter Integer");
     return node;
   }
 
   @Override
   protected Node exitString(Token node) throws ParseException {
     actualNodes.push(new Str(node));
-    System.out.println(" --->Enter Str");
+    //System.out.println(" --->Enter Str");
 
     return node;
   }
@@ -56,7 +56,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
   @Override
   protected Node exitTrue(Token node) throws ParseException {
     actualNodes.push(new Bool(node));
-    System.out.println(" --->Enter True");
+    //System.out.println(" --->Enter True");
 
     return node;
   }
@@ -64,7 +64,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
   @Override
   protected Node exitFalse(Token node) throws ParseException {
     actualNodes.push(new Bool(node));
-    System.out.println(" --->Enter False");
+    //System.out.println(" --->Enter False");
 
     return node;
   }
@@ -72,7 +72,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
   @Override
   protected Node exitName(Token node) throws ParseException {
     actualNodes.push(new Identifier(node));
-    System.out.println(" --->Enter Name");
+    //System.out.println(" --->Enter Name");
 
     return node;
   }
@@ -184,50 +184,50 @@ public class ExprBuilder extends CopperHeadAnalyzer{
   //recursive defs START
   @Override
   protected void enterExpr(Production node) throws ParseException {
-    System.out.println("-----> Entering expr rule <----");
+    //System.out.println("-----> Entering expr rule <----");
     setEntrance();
   }
 
   @Override
   protected void enterBinOp(Production node) throws ParseException {
-    System.out.println("-----> Entering Bin op <------");
+    //System.out.println("-----> Entering Bin op <------");
     setEntrance();
   }
   
   @Override
   protected void enterFuncCall(Production node) throws ParseException {
-    System.out.println("-----> Entering Func Call <------");
+    //System.out.println("-----> Entering Func Call <------");
     setEntrance();
   }
   
   @Override
   protected void enterLetDec(Production node) throws ParseException {
-    System.out.println("-----> Entering Let Declaration <------");
+    //System.out.println("-----> Entering Let Declaration <------");
     setEntrance();
   }
   
   @Override
   protected void enterFuncDef(Production node) throws ParseException {
-    System.out.println("-----> Entering Func Declaration <------");
+    //System.out.println("-----> Entering Func Declaration <------");
     setEntrance();
   }
   
   
   @Override
   protected void enterIfExpr(Production node) throws ParseException {
-    System.out.println("-----> Entering If exprs <------");
+    //System.out.println("-----> Entering If exprs <------");
     setEntrance();
   }
   
   @Override
   protected void enterWhileLoop(Production node) throws ParseException {
-    System.out.println("-----> Entering While exprs <------");
+    //System.out.println("-----> Entering While exprs <------");
     setEntrance();
   }
   
   @Override
   protected void enterSetVar(Production node) throws ParseException {
-    System.out.println("------> Entering Set Expr <------");
+    //System.out.println("------> Entering Set Expr <------");
     setEntrance();
   }
   
@@ -248,7 +248,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
         identifier, 
         value);
     
-    System.out.println("---> Exit SET : "+set);
+    //System.out.println("---> Exit SET : "+set);
     
     actualNodes.push(set);
     return node;
@@ -273,7 +273,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     WhileExpr whileLoop = new WhileExpr(whileKeyWord.getLeadToken()
         , condition, statements);
     
-    System.out.println("-----> Exiting While: "+whileLoop);
+    //System.out.println("-----> Exiting While: "+whileLoop);
     actualNodes.push(whileLoop);
     return node;
   }
@@ -300,7 +300,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
         falseConseq);
     
     actualNodes.push(ifExpr);
-    System.out.println("-----> Exiting If: "+ifExpr);
+    //System.out.println("-----> Exiting If: "+ifExpr);
     
     return node;
   }
@@ -365,7 +365,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
         functionReturn, 
         statements);
     
-    System.out.println("----> Exiting Function DEF: "+functDefExpr);
+    //System.out.println("----> Exiting Function DEF: "+functDefExpr);
     
     actualNodes.push(functDefExpr);
     
@@ -382,7 +382,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     LinkedHashMap<String, IdenTypeValTuple> letVariables = new LinkedHashMap<>();
     //will have to manually gather let variables
     
-    System.out.println(exprs);
+    //System.out.println(exprs);
     
     while (!exprs.isEmpty()) {
       Expr name = exprs.pollFirst();
@@ -422,7 +422,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     
     //now push let object to stack
     LetExpr letExpr = new LetExpr(letKeyWord.getLeadToken(), letVariables, statements);
-    System.out.println("-----> EXITING Let Declaration: "+letExpr);
+    //System.out.println("-----> EXITING Let Declaration: "+letExpr);
     actualNodes.push(letExpr);
     return node;
   }
@@ -442,7 +442,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     
     FunctionCall functionCall = new FunctionCall(funcName.getLeadToken(), arguments);
     actualNodes.push(functionCall);
-    System.out.println("-----> Exiting Func Call : "+functionCall);
+    //System.out.println("-----> Exiting Func Call : "+functionCall);
     return node;
   }
 
@@ -458,16 +458,16 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     Expr right = exprs.pollFirst();
 
     actualNodes.push(new BinaryOpExpr(operator, left, right));
-    System.out.println("-----> Exiting BinOp <------");
+    //System.out.println("-----> Exiting BinOp <------");
     return node;
   }
 
   @Override
   protected Node exitExpr(Production node) throws ParseException {
     ArrayDeque<Expr> exprs = exitEntrance();
-    System.out.println(actualNodes+" | "+exprs);
+    //System.out.println(actualNodes+" | "+exprs);
     actualNodes.push(exprs.pop());
-    System.out.println("----> EXITING EXPR <-----");
+    //System.out.println("----> EXITING EXPR <-----");
     return node;
   }
   //recursive defs END

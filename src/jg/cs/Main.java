@@ -1,10 +1,10 @@
 package jg.cs;
 
 import java.io.File;
-import java.io.StringReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import jg.cs.compile.Program;
 import jg.cs.compile.TypeChecker;
@@ -23,41 +23,44 @@ import net.percederberg.grammatica.parser.Tokenizer;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    String test = "";
-    Scanner scanner = new Scanner(new File("sample.nek"));
-    while (scanner.hasNextLine()) {
-      test += scanner.nextLine()+System.lineSeparator();
+    if (args.length == 1) {
+      File targetFile = new File(args[0]);
+      if (targetFile.exists() && targetFile.canRead()) {
+        List<Token> tokens = tokenizeSource(targetFile);
+        if (tokens == null) {
+          System.err.println("Fatal Error: Couldn't create tokenizer! Exiting....");
+          System.exit(-1);
+        }
+
+        //System.out.println("ALL: "+tokens);
+        System.out.println("sNEK Interpreter v1.0");
+        System.out.println("-------------PARSING------------");
+        List<Expr> components = parse(tokens);
+        if (components == null) {
+          System.err.println("Fatal Error: Couldn't create parser! Exiting....");
+          System.exit(-1);
+        }
+
+        Program program = Program.formProgram("testProg", components);
+        //System.out.println(components);
+
+        System.out.println("-------------TYPE CHECKING-------------");
+        TypeChecker typeChecker = new TypeChecker(program);
+        //System.out.println("RESULT: "+typeChecker.checkType());
+        
+        System.out.println("-------------EXECUTING-------------");
+        Executor executor = new Executor(program);
+        Value<?> result = executor.execute();
+        
+        //System.out.println(" -----> FINAL: "+result);
+      }
+      else {
+        System.err.println("sNEK: Provided source file is either nonexistant or unreadble!");
+      }
     }
-    scanner.close();   
-    
-    System.out.println("to parse: "+test);
-
-    List<Token> tokens = tokenizeSource(test);
-    if (tokens == null) {
-      System.err.println("Fatal Error: Couldn't create tokenizer! Exiting....");
-      System.exit(-1);
+    else {
+      System.err.println("sNEK: Missing file argument!");
     }
-
-    System.out.println("ALL: "+tokens);
-
-    List<Expr> components = parse(tokens);
-    if (components == null) {
-      System.err.println("Fatal Error: Couldn't create parser! Exiting....");
-      System.exit(-1);
-    }
-
-    Program program = Program.formProgram("testProg", components);
-    System.out.println(components);
-
-    System.out.println("-------------TYPE CHECKING-------------");
-    TypeChecker typeChecker = new TypeChecker(program);
-    System.out.println("RESULT: "+typeChecker.checkType());
-    
-    System.out.println("-------------EXECUTING-------------");
-    Executor executor = new Executor(program);
-    Value<?> result = executor.execute();
-    
-    System.out.println(" -----> FINAL: "+result);
   }
   
   /**
@@ -65,10 +68,11 @@ public class Main {
    * @param source - the entire source program as a string
    * @return a list of Tokens
    * @throws ParseException - if an unrecognizable token was detected
+   * @throws FileNotFoundException 
    */
-  public static List<Token> tokenizeSource(String source) throws ParseException{
+  public static List<Token> tokenizeSource(File source) throws ParseException, FileNotFoundException{
     try {
-      Tokenizer tokenizer = new CopperHeadTokenizer(new StringReader(source));
+      Tokenizer tokenizer = new CopperHeadTokenizer(new FileReader(source));
       ArrayList<Token> allTokens = new ArrayList<>();
 
       Token current = null;

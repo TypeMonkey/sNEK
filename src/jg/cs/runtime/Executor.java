@@ -44,12 +44,12 @@ public class Executor {
   }
   
   public Value<?> execute(){
-    System.out.println("---FMAP: "+program.getFileFunctions());
+    //System.out.println("---FMAP: "+program.getFileFunctions());
     Value<?> latest = null;
     for (Expr component : program.getExprList()) {
       latest = evalExpr(component, new ArrayList<>(), fwrap(program.getFileFunctions()));
-      System.out.println("**************************");
-      System.out.println("******----------**********");
+      //System.out.println("**************************");
+      //System.out.println("******----------**********");
     }   
     
     return latest;
@@ -58,17 +58,17 @@ public class Executor {
   private Value evalExpr(Expr expr, 
       List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    System.out.println("TARGET: "+expr);
+    //System.out.println("TARGET: "+expr);
     if (expr instanceof Int) {
-      System.out.println(" FOR INT "+((Int) expr).getActualValue());
+      //System.out.println(" FOR INT "+((Int) expr).getActualValue());
       return new IntValue(((Int) expr).getActualValue());
     }
     else if (expr instanceof Bool) {
-      System.out.println(" FOR BOOL "+((Bool) expr).getActualValue());
+      //System.out.println(" FOR BOOL "+((Bool) expr).getActualValue());
       return new BoolValue(((Bool) expr).getActualValue());
     }
     else if (expr instanceof Str) {
-      System.out.println(" FOR STR '"+((Str) expr).clipQuotes()+"'");
+      //System.out.println(" FOR STR '"+((Str) expr).clipQuotes()+"'");
       return new StringValue(((Str) expr).clipQuotes());
     }
     else if (expr instanceof Identifier) {
@@ -97,7 +97,7 @@ public class Executor {
       return evalWhileLoop((WhileExpr) expr, env, fenv);
     }
     
-    System.out.println("unknown? "+expr.getClass());
+    //System.out.println("unknown? "+expr.getClass());
     return null;
   }
   
@@ -109,9 +109,9 @@ public class Executor {
     Value<?> leftValue = evalExpr(binaryOpExpr.getLeft(), env, fenv);
     Value<?> rightValue = evalExpr(binaryOpExpr.getRight(), env, fenv);
     
-    System.out.println(" FOR BIN-OP: left = "+leftValue+" , right = "+rightValue);
-    System.out.println("    LEFT: "+binaryOpExpr.getLeft());
-    System.out.println("    RIGHT: "+binaryOpExpr.getRight());
+    //System.out.println(" FOR BIN-OP: left = "+leftValue+" , right = "+rightValue);
+    //System.out.println("    LEFT: "+binaryOpExpr.getLeft());
+    //System.out.println("    RIGHT: "+binaryOpExpr.getRight());
     
     if (operatorKind == OperatorKind.EQUAL) {
       return new BoolValue(leftValue.getActualValue().equals(rightValue.getActualValue()));
@@ -144,14 +144,14 @@ public class Executor {
       List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
 
-    System.out.println("****** FUN CALL "+call);
+    //System.out.println("****** FUN CALL "+call);
     Type [] argTypes = new Type[call.getArgCount()];
     Value<?> [] argValue = new Value<?>[call.getArgCount()];
     int i = 0;
     for(Expr argument : call.getArguments()) {
       argValue[i] = evalExpr(argument, env, fenv);
       argTypes[i] = argValue[i].getValueType();
-      System.out.println("    ---> ARG["+i+"]:  "+argument);
+      //System.out.println("    ---> ARG["+i+"]:  "+argument);
       i++;
     }
 
@@ -182,7 +182,7 @@ public class Executor {
       Value<?> latest = null;
       LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
 
-      System.out.println("---ARG MAP: "+argMap+" | "+fenv);
+      //System.out.println("---ARG MAP: "+argMap+" | "+fenv);
       
       for(Expr statement : foundFunction.getExpressionsExprs()) {
         if (statement instanceof FunctDefExpr) {
@@ -202,12 +202,12 @@ public class Executor {
   private Value<?> evalIf(IfExpr ifExpr, 
       List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    System.out.println(" --- IF CODE: "+ifExpr.getCondition()+" | "+env);
+    //System.out.println(" --- IF CODE: "+ifExpr.getCondition()+" | "+env);
     
     //check condition
     BoolValue condition = (BoolValue) evalExpr(ifExpr.getCondition(), env, fenv);
     
-    System.out.println("---- FOR IF: "+ifExpr.getCondition()+"  got "+condition);
+    //System.out.println("---- FOR IF: "+ifExpr.getCondition()+"  got "+condition);
     if (condition.getActualValue()) {
       return evalExpr(ifExpr.getTrueConseq(), env, fenv);
     }
@@ -223,13 +223,13 @@ public class Executor {
     Value<?> latest = (BoolValue) evalExpr(whileExpr.getCondition(), env, fenv);    
     BoolValue condition = (BoolValue) latest;
     
-    System.out.println("  FOR WHILE LOOP: "+whileExpr);
+    //System.out.println("  FOR WHILE LOOP: "+whileExpr);
     
     while (condition.getActualValue()) {
       LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
       
       for(Expr statement : whileExpr.getExpressions()) {
-        System.out.println("   PRIOR ENV MAP: "+env);
+        //System.out.println("   PRIOR ENV MAP: "+env);
         if (statement instanceof FunctDefExpr) {
           FunctDefExpr functDefExpr = (FunctDefExpr) statement;
           latest = evalFunctionDef(functDefExpr, env, fconcatToFront(localFuncMap, fenv));
@@ -238,7 +238,7 @@ public class Executor {
         else {
           latest = evalExpr(statement, env, fconcatToFront(localFuncMap, fenv));
         }
-        System.out.println("   AFTER ENV MAP: "+env);
+        //System.out.println("   AFTER ENV MAP: "+env);
       }
       
       condition = (BoolValue) evalExpr(whileExpr.getCondition(), env , fenv);
@@ -253,7 +253,7 @@ public class Executor {
     
     LinkedHashMap<String, Value<?>> localEnv = new LinkedHashMap<>();
    
-    System.out.println("---LET: "+expr.getExpressions());
+    //System.out.println("---LET: "+expr.getExpressions());
     
     //load all local variables with their initialized variable
     Map<String, IdenTypeValTuple> originalMap = expr.getVars();
@@ -262,7 +262,7 @@ public class Executor {
       localEnv.put(entry.getKey(), initValue);
     }
     
-    System.out.println("----DONE CHECKING LET "+localEnv);
+    //System.out.println("----DONE CHECKING LET "+localEnv);
     //now, check all statements
     Value<?> latestValue = null;
     
@@ -279,7 +279,7 @@ public class Executor {
       }
     }
     
-    System.out.println("-----AFTER LET: "+localEnv);
+    //System.out.println("-----AFTER LET: "+localEnv);
     
     return latestValue;
   }
@@ -311,7 +311,7 @@ public class Executor {
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
     for (Map<String, Value<?>> map : env) {
       if (map.containsKey(identifier.getActualValue())) {
-        System.out.println(" FOR VAR '"+identifier.getActualValue()+"' , the value found is "+map.get(identifier.getActualValue())+" | "+env);
+        //System.out.println(" FOR VAR '"+identifier.getActualValue()+"' , the value found is "+map.get(identifier.getActualValue())+" | "+env);
         return map.get(identifier.getActualValue());
       }
     }
