@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import jg.cs.common.BuiltInFunctions;
 import jg.cs.common.FunctionSignature;
@@ -28,6 +29,10 @@ import jg.cs.compile.nodes.atoms.Bool;
 import jg.cs.compile.nodes.atoms.Identifier;
 import jg.cs.compile.nodes.atoms.Int;
 import jg.cs.compile.nodes.atoms.Str;
+import jg.cs.runtime.values.BoolValue;
+import jg.cs.runtime.values.FunctionValue;
+import jg.cs.runtime.values.IntValue;
+import jg.cs.runtime.values.StringValue;
 import jg.cs.runtime.values.Value;
 
 public class Executor {
@@ -42,306 +47,281 @@ public class Executor {
     System.out.println("---FMAP: "+program.getFileFunctions());
     Value<?> latest = null;
     for (Expr component : program.getExprList()) {
-      latest = checkExpr(component, new ArrayList<>(), fwrap(program.getFileFunctions()));
+      latest = evalExpr(component, new ArrayList<>(), fwrap(program.getFileFunctions()));
+      System.out.println("**************************");
+      System.out.println("******----------**********");
     }   
     
     return latest;
   }
   
-  private Type checkExpr(Expr expr, 
-      List<Map<String, IdenTypeValTuple>> others, 
+  private Value evalExpr(Expr expr, 
+      List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
     System.out.println("TARGET: "+expr);
     if (expr instanceof Int) {
-      return Type.INT;
+      System.out.println(" FOR INT "+((Int) expr).getActualValue());
+      return new IntValue(((Int) expr).getActualValue());
     }
     else if (expr instanceof Bool) {
-      return Type.BOOL;
+      System.out.println(" FOR BOOL "+((Bool) expr).getActualValue());
+      return new BoolValue(((Bool) expr).getActualValue());
     }
     else if (expr instanceof Str) {
-      return Type.STRING;
+      System.out.println(" FOR STR '"+((Str) expr).clipQuotes()+"'");
+      return new StringValue(((Str) expr).clipQuotes());
     }
     else if (expr instanceof Identifier) {
-      return checkIdentifier((Identifier) expr, others, fenv);
+      return evalIdentifier((Identifier) expr, env, fenv);
     }
     else if (expr instanceof FunctDefExpr) {
       FunctDefExpr functDef = (FunctDefExpr) expr;
-      System.out.println("--------CHECKED: "+checkedFunctions);
-      if (checkedFunctions.contains(functDef.getIdentity().getSignature())) {
-        return functDef.getReturnType().getActualValue();
-      }
-      return checkFuncDef(functDef, others, fenv);
+      return evalFunctionDef(functDef, env, fenv);
     }
     else if (expr instanceof LetExpr) {
-      return checkLet((LetExpr) expr, others, fenv);
+      return evalLet((LetExpr) expr, env, fenv);
     }
     else if (expr instanceof IfExpr) {
-      return checkIf((IfExpr) expr, others, fenv);
+      return evalIf((IfExpr) expr, env, fenv);
     }
     else if (expr instanceof BinaryOpExpr) {
-      return checkBinaryOperation((BinaryOpExpr) expr, others, fenv);
+      return evalBinaryOp((BinaryOpExpr) expr, env, fenv);
     }
     else if (expr instanceof SetExpr) {
-      return checkSetExpr((SetExpr) expr, others, fenv);
+      return evalSetExpr((SetExpr) expr, env, fenv);
     }
     else if (expr instanceof FunctionCall) {
-      return checkFunctionCall((FunctionCall) expr, others, fenv);
+      return evalFunctionCall((FunctionCall) expr, env, fenv);
     }
     else if (expr instanceof WhileExpr) {
-      return checkWhileLoop((WhileExpr) expr, others, fenv);
+      return evalWhileLoop((WhileExpr) expr, env, fenv);
     }
     
     System.out.println("unknown? "+expr.getClass());
     return null;
   }
   
-  private Type checkBinaryOperation(BinaryOpExpr binaryOpExpr, 
-      List<Map<String, IdenTypeValTuple>> others, 
+  private Value<?> evalBinaryOp(BinaryOpExpr binaryOpExpr, 
+      List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    System.out.println("----BIN OP: "+binaryOpExpr);
-    Type leftType = checkExpr(binaryOpExpr.getLeft(), others, fenv);
-    Type rightType = checkExpr(binaryOpExpr.getRight(), others, fenv);
+    OperatorKind operatorKind = binaryOpExpr.getOperator().getActualValue();
     
-    BinaryOperator operator = binaryOpExpr.getOperator();
-    OperatorKind operatorKind = operator.getActualValue();
+    Value<?> leftValue = evalExpr(binaryOpExpr.getLeft(), env, fenv);
+    Value<?> rightValue = evalExpr(binaryOpExpr.getRight(), env, fenv);
     
-    //arithmetic operators
-    HashSet<OperatorKind> arithOps = new HashSet<OperatorKind>();
-    arithOps.addAll(Arrays.asList(OperatorKind.PLUS, OperatorKind.MINUS, OperatorKind.TIMES));
+    System.out.println(" FOR BIN-OP: left = "+leftValue+" , right = "+rightValue);
+    System.out.println("    LEFT: "+binaryOpExpr.getLeft());
+    System.out.println("    RIGHT: "+binaryOpExpr.getRight());
     
-    if (arithOps.contains(operatorKind)) {
-      if (leftType != Type.INT) {
-        System.out.println("----LEFT TYPE: "+leftType);
-        throw new TypeMismatchException(operatorKind, 
-            binaryOpExpr.getLeft(), leftType, Type.INT, program.getFileName());
-      }
-      else if (rightType != Type.INT) {
-        throw new TypeMismatchException(operatorKind, 
-            binaryOpExpr.getRight(), rightType, Type.INT, program.getFileName());
-      }
-      else {
-        return Type.INT;
-      }
-    }
-    else if (operatorKind == OperatorKind.EQUAL) {
-      return Type.BOOL;
+    if (operatorKind == OperatorKind.EQUAL) {
+      return new BoolValue(leftValue.getActualValue().equals(rightValue.getActualValue()));
     }
     else {
-      //comparison operator
-      if (leftType != Type.INT) {
-        throw new TypeMismatchException(operatorKind, 
-            binaryOpExpr.getLeft(), leftType, Type.INT, program.getFileName());
+      IntValue intLeft = (IntValue) leftValue;
+      IntValue intRight = (IntValue) rightValue;
+
+      if (operatorKind == OperatorKind.PLUS) {
+        return new IntValue(intLeft.getActualValue() + intRight.getActualValue());
       }
-      else if (rightType != Type.INT) {
-        throw new TypeMismatchException(operatorKind, 
-            binaryOpExpr.getRight(), rightType, Type.INT, program.getFileName());
+      else if (operatorKind == OperatorKind.MINUS) {
+        return new IntValue(intLeft.getActualValue() - intRight.getActualValue());
       }
-      else {
-        return Type.BOOL;
+      else if (operatorKind == OperatorKind.TIMES) {
+        return new IntValue(intLeft.getActualValue() * intRight.getActualValue());
       }
+      else if (operatorKind == OperatorKind.LESS) {
+        return new BoolValue(intLeft.getActualValue() < intRight.getActualValue());
+      }
+      else if (operatorKind == OperatorKind.GREAT) {
+        return new BoolValue(intLeft.getActualValue() > intRight.getActualValue());
+      }
+      
+      throw new RuntimeException("Unknown operator: "+operatorKind);
     }
   }
   
-  private Type checkFunctionCall(FunctionCall call, 
-      List<Map<String, IdenTypeValTuple>> others, 
+  private Value<?> evalFunctionCall(FunctionCall call, 
+      List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    
+
     System.out.println("****** FUN CALL "+call);
     Type [] argTypes = new Type[call.getArgCount()];
+    Value<?> [] argValue = new Value<?>[call.getArgCount()];
     int i = 0;
     for(Expr argument : call.getArguments()) {
-      argTypes[i] = checkExpr(argument, others, fenv);
+      argValue[i] = evalExpr(argument, env, fenv);
+      argTypes[i] = argValue[i].getValueType();
       System.out.println("    ---> ARG["+i+"]:  "+argument);
       i++;
     }
-    
+
     FunctionSignature signature = new FunctionSignature(
         call.getFuncName().getImage(), 
         argTypes);
-    
+
+    FunctDefExpr foundFunction = null;
     for (Map<FunctionSignature, FunctDefExpr> fmap : fenv) {
       if (fmap.containsKey(signature)) {
-        Type retType = fmap.get(signature).getReturnType().getActualValue();
-        System.out.println(" --->!!! FOUND TYPE: "+retType);
-        return retType;
+        foundFunction = fmap.get(signature);
       }
     }
+
     
     //if function isn't found, then check built ins
-    if (BuiltInFunctions.BUILT_IN_MAP.containsKey(signature)) {
-      return BuiltInFunctions.BUILT_IN_MAP.get(signature).getReturnType();
+    if (foundFunction == null && BuiltInFunctions.BUILT_IN_MAP.containsKey(signature)) {
+      return BuiltInFuncEvaluator.callBuiltIn(BuiltInFunctions.BUILT_IN_MAP.get(signature), argValue);
     }
-    
-    System.out.println("FINDING: "+signature);
-    System.out.println("  MAPS: "+fenv);
-    throw new UnresolvableComponentException(signature, 
-        call.getLeadToken(), 
-        program.getFileName());
-  }
-  
-  private Type checkIf(IfExpr ifExpr, 
-      List<Map<String, IdenTypeValTuple>> others, 
-      List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    Type actualTypeOfCond = checkExpr(ifExpr.getCondition(), others, fenv);
-    if (actualTypeOfCond != Type.BOOL) {
-      throw new TypeMismatchException(ifExpr.getLeadToken(), 
-          Type.BOOL, actualTypeOfCond, program.getFileName());
-    }
-    
-    //check if both consequences have the same type
-    Type trueConseq = checkExpr(ifExpr.getTrueConseq(), others, fenv);
-    Type falseConseq = checkExpr(ifExpr.getFalseConseq(), others, fenv);
-    
-    if (trueConseq != falseConseq) {
-      throw new TypeMismatchException(ifExpr.getLeadToken(), 
-          trueConseq, 
-          falseConseq, 
-          program.getFileName());
-    }
-    
-    return trueConseq;
-  }
-  
-  private Type checkWhileLoop(WhileExpr whileExpr, 
-      List<Map<String, IdenTypeValTuple>> others, 
-      List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    Type actualTypeOfCond = checkExpr(whileExpr.getCondition(), others, fenv);
-    if (actualTypeOfCond != Type.BOOL) {
-      throw new TypeMismatchException(whileExpr.getLeadToken(), 
-          Type.BOOL, actualTypeOfCond, program.getFileName());
-    }
-    
-    //now, check all statements
-    Type latestType = null;
-    
-    LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
-    
-    //if last statement is func def, throw error
-    Expr latest = null;
-    for(Expr statement : whileExpr.getExpressions()) {
-      if (statement instanceof FunctDefExpr) {
-        FunctDefExpr functDefExpr = (FunctDefExpr) statement;
-        latestType = checkFuncDef(functDefExpr, others, fconcatToFront(localFuncMap, fenv));
-        localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
+    else {
+      LinkedHashMap<String, Value<?>> argMap = new LinkedHashMap<>();
+      i = 0;
+      for (Entry<String, IdenTypeValTuple> param: foundFunction.getParameters().entrySet()) {
+        argMap.put(param.getKey(), argValue[i]);
+        i++;
+      }  
+
+      Value<?> latest = null;
+      LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
+
+      System.out.println("---ARG MAP: "+argMap+" | "+fenv);
+      
+      for(Expr statement : foundFunction.getExpressionsExprs()) {
+        if (statement instanceof FunctDefExpr) {
+          FunctDefExpr functDefExpr = (FunctDefExpr) statement;
+          latest = evalFunctionDef(functDefExpr, env, fconcatToFront(localFuncMap, fenv));
+          localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
+        }
+        else {
+          latest = evalExpr(statement, concatToFront(argMap, env), fconcatToFront(localFuncMap, fenv));
+        }
       }
-      else {
-        latest = statement;
-        latestType = checkExpr(statement, others, fenv);
-      }
+
+      return latest;
     }
-    
-    if (latest instanceof FunctDefExpr) {
-      throw new TypeMismatchException((FunctDefExpr) latest, program.getFileName());
-    }
-    
-    return latestType;
   }
   
-  private Type checkLet(LetExpr expr, 
-      List<Map<String, IdenTypeValTuple>> others, 
+  private Value<?> evalIf(IfExpr ifExpr, 
+      List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    LinkedHashMap<String, IdenTypeValTuple> localEnv = new LinkedHashMap<>();
+    System.out.println(" --- IF CODE: "+ifExpr.getCondition()+" | "+env);
+    
+    //check condition
+    BoolValue condition = (BoolValue) evalExpr(ifExpr.getCondition(), env, fenv);
+    
+    System.out.println("---- FOR IF: "+ifExpr.getCondition()+"  got "+condition);
+    if (condition.getActualValue()) {
+      return evalExpr(ifExpr.getTrueConseq(), env, fenv);
+    }
+    else {
+      return evalExpr(ifExpr.getFalseConseq(), env, fenv);
+    }    
+  }
+  
+  private Value<?> evalWhileLoop(WhileExpr whileExpr, 
+      List<Map<String, Value<?>>> env, 
+      List<Map<FunctionSignature, FunctDefExpr>> fenv) {
+    //check condition prior to iterating
+    Value<?> latest = (BoolValue) evalExpr(whileExpr.getCondition(), env, fenv);    
+    BoolValue condition = (BoolValue) latest;
+    
+    System.out.println("  FOR WHILE LOOP: "+whileExpr);
+    
+    while (condition.getActualValue()) {
+      LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
+      
+      for(Expr statement : whileExpr.getExpressions()) {
+        System.out.println("   PRIOR ENV MAP: "+env);
+        if (statement instanceof FunctDefExpr) {
+          FunctDefExpr functDefExpr = (FunctDefExpr) statement;
+          latest = evalFunctionDef(functDefExpr, env, fconcatToFront(localFuncMap, fenv));
+          localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
+        }
+        else {
+          latest = evalExpr(statement, env, fconcatToFront(localFuncMap, fenv));
+        }
+        System.out.println("   AFTER ENV MAP: "+env);
+      }
+      
+      condition = (BoolValue) evalExpr(whileExpr.getCondition(), env , fenv);
+    }
+    
+    return latest;
+  }
+  
+  private Value<?> evalLet(LetExpr expr, 
+      List<Map<String, Value<?>>> env, 
+      List<Map<FunctionSignature, FunctDefExpr>> fenv) {
+    
+    LinkedHashMap<String, Value<?>> localEnv = new LinkedHashMap<>();
    
     System.out.println("---LET: "+expr.getExpressions());
     
-    //load all local variables. At each local variable, evaluate the type
-    //of its value with the current localEnv
-    
-    for (IdenTypeValTuple var : expr.getVars().values()) {
-      Type typeOfValue = checkExpr(var.getValue(), concatToFront(localEnv, others) , fenv);
-      if (var.getType() != typeOfValue) {
-        throw new TypeMismatchException(var, typeOfValue, program.getFileName());
-      }
-      
-      localEnv.put(var.getIdentifier().getActualValue(), var);
+    //load all local variables with their initialized variable
+    Map<String, IdenTypeValTuple> originalMap = expr.getVars();
+    for (Entry<String, IdenTypeValTuple> entry : originalMap.entrySet()) {
+      Value<?> initValue = evalExpr(entry.getValue().getValue(), env, fenv);
+      localEnv.put(entry.getKey(), initValue);
     }
-    System.out.println("----DONE CHECKING LET");
+    
+    System.out.println("----DONE CHECKING LET "+localEnv);
     //now, check all statements
-    Type latestType = null;
+    Value<?> latestValue = null;
     
     LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
     
     for(Expr statement : expr.getExpressions()) {
       if (statement instanceof FunctDefExpr) {
         FunctDefExpr functDefExpr = (FunctDefExpr) statement;
-        latestType = checkFuncDef(functDefExpr, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
+        latestValue = evalFunctionDef(functDefExpr, concatToFront(localEnv, env), fconcatToFront(localFuncMap, fenv));
         localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
       }
       else {
-        latestType = checkExpr(statement, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
+        latestValue = evalExpr(statement, concatToFront(localEnv, env), fconcatToFront(localFuncMap, fenv));
       }
     }
     
-    return latestType;
+    System.out.println("-----AFTER LET: "+localEnv);
+    
+    return latestValue;
   }
   
-  private Type checkFuncDef(FunctDefExpr expr, 
-      List<Map<String, IdenTypeValTuple>> others, 
+  private FunctionValue evalFunctionDef(FunctDefExpr expr, 
+      List<Map<String, Value<?>>> others, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    LinkedHashMap<String, IdenTypeValTuple> localEnv = new LinkedHashMap<>();
-   
-    //load all parameters variables. At each parameter, evaluate the type
-    //of its value with the current localEnv
-    
-    for (IdenTypeValTuple var : expr.getParameters().values()) {
-      localEnv.put(var.getIdentifier().getActualValue(), var);
-    }
-    
-    //now, check all statements   
-    LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
-    
-    Type lastType = null;
-    for(Expr statement : expr.getExpressionsExprs()) {
-      if (statement instanceof FunctDefExpr) {
-        FunctDefExpr functDefExpr = (FunctDefExpr) statement;
-        localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
-        lastType = checkFuncDef(functDefExpr, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
-      }
-      else {
-        lastType = checkExpr(statement, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
-      }
-    }
-    
-    if (expr.getReturnType().getActualValue() == Type.VOID ||
-        lastType == expr.getReturnType().getActualValue()) {
-      checkedFunctions.add(expr.getIdentity().getSignature());
-      return lastType;
-    }
-    throw new TypeMismatchException(expr.getLeadToken(),
-        expr.getReturnType().getActualValue(), lastType, program.getFileName());
+    return new FunctionValue(expr);
   }
   
-  private Type checkSetExpr(SetExpr setExpr, 
-      List<Map<String, IdenTypeValTuple>> env, 
+  private Value<?> evalSetExpr(SetExpr setExpr, 
+      List<Map<String, Value<?>>> env, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    Type varType = checkIdentifier(setExpr.getIdentifier(), env, fenv);
     
-    Type valueType = checkExpr(setExpr.getValue(), env, fenv);
+    Identifier identifier = setExpr.getIdentifier();
+    Value<?> value = evalExpr(setExpr.getValue(), env, fenv);
     
-    if (varType == valueType) {
-      return varType;
-    }
-    throw new TypeMismatchException(setExpr.getLeadToken(), 
-        varType, 
-        valueType, 
-        program.getFileName());
-  }
-  
-  private Type checkIdentifier(Identifier identifier, 
-      List<Map<String, IdenTypeValTuple>> env, 
-      List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    for (Map<String, IdenTypeValTuple> map : env) {
+    for (Map<String, Value<?>> map : env) {
       if (map.containsKey(identifier.getActualValue())) {
-        return map.get(identifier.getActualValue()).getType();
+        map.put(identifier.getActualValue(), value);
+      }
+    }
+    
+    return value;
+  }
+  
+  private Value<?> evalIdentifier(Identifier identifier, 
+      List<Map<String, Value<?>>> env, 
+      List<Map<FunctionSignature, FunctDefExpr>> fenv) {
+    for (Map<String, Value<?>> map : env) {
+      if (map.containsKey(identifier.getActualValue())) {
+        System.out.println(" FOR VAR '"+identifier.getActualValue()+"' , the value found is "+map.get(identifier.getActualValue())+" | "+env);
+        return map.get(identifier.getActualValue());
       }
     }
     throw new UnresolvableComponentException(identifier, program.getFileName());
   }
   
-  private List<Map<String, IdenTypeValTuple>> concatToFront(
-      Map<String, IdenTypeValTuple> newMap, 
-      List<Map<String, IdenTypeValTuple>> others){
-    ArrayList<Map<String, IdenTypeValTuple>> newEnv = new ArrayList<>();
+  private List<Map<String, Value<?>>> concatToFront(
+      Map<String, Value<?>> newMap, 
+      List<Map<String, Value<?>>> others){
+    ArrayList<Map<String, Value<?>>> newEnv = new ArrayList<>();
     newEnv.add(newMap);
     newEnv.addAll(others);
     

@@ -48,6 +48,16 @@ public enum BuiltInFunctions {
    */
   DEC(new FunctionIdentity(new FunctionSignature("dec", Type.INT), Type.INT)),
   
+  /**
+   * Returns the string representation of an integer
+   */
+  TO_STR_I(new FunctionIdentity(new FunctionSignature("toStr", Type.INT), Type.STRING)),
+  
+  /**
+   * Returns the string representation of a boolean
+   */
+  TO_STR_B(new FunctionIdentity(new FunctionSignature("toStr", Type.BOOL), Type.STRING)),
+  
   ISINT_I(new FunctionIdentity(new FunctionSignature("isInt", Type.INT), Type.BOOL)),
   
   ISINT_B(new FunctionIdentity(new FunctionSignature("isInt", Type.BOOL), Type.BOOL)),
@@ -74,12 +84,12 @@ public enum BuiltInFunctions {
   
   private final FunctionIdentity identity;
   
-  public static final Map<FunctionSignature, FunctionIdentity> BUILT_IN_MAP;
+  public static final Map<FunctionSignature, BuiltInFunctions> BUILT_IN_MAP;
   static {
-    HashMap<FunctionSignature, FunctionIdentity> temp = new HashMap<>();
+    HashMap<FunctionSignature, BuiltInFunctions> temp = new HashMap<>();
     
     for (BuiltInFunctions funcs : BuiltInFunctions.values()) {
-      temp.put(funcs.identity.getSignature(), funcs.identity);
+      temp.put(funcs.identity.getSignature(), funcs);
     }
     
     BUILT_IN_MAP = Collections.unmodifiableMap(temp);

@@ -170,7 +170,7 @@ public class TypeChecker {
     
     //if function isn't found, then check built ins
     if (BuiltInFunctions.BUILT_IN_MAP.containsKey(signature)) {
-      return BuiltInFunctions.BUILT_IN_MAP.get(signature).getReturnType();
+      return BuiltInFunctions.BUILT_IN_MAP.get(signature).getIdentity().getReturnType();
     }
     
     System.out.println("FINDING: "+signature);

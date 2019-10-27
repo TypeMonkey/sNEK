@@ -12,6 +12,8 @@ import jg.cs.compile.nodes.Expr;
 import jg.cs.compile.parser.CopperHeadParser;
 import jg.cs.compile.parser.CopperHeadTokenizer;
 import jg.cs.compile.parser.ExprBuilder;
+import jg.cs.runtime.Executor;
+import jg.cs.runtime.values.Value;
 import net.percederberg.grammatica.parser.ParseException;
 import net.percederberg.grammatica.parser.ParserCreationException;
 import net.percederberg.grammatica.parser.ParserLogException;
@@ -50,6 +52,12 @@ public class Main {
     System.out.println("-------------TYPE CHECKING-------------");
     TypeChecker typeChecker = new TypeChecker(program);
     System.out.println("RESULT: "+typeChecker.checkType());
+    
+    System.out.println("-------------EXECUTING-------------");
+    Executor executor = new Executor(program);
+    Value<?> result = executor.execute();
+    
+    System.out.println(" -----> FINAL: "+result);
   }
   
   /**
