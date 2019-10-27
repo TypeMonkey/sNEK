@@ -23,7 +23,7 @@ import net.percederberg.grammatica.parser.Tokenizer;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    if (args.length == 1) {
+    if (args.length == 1 && getFileExtension(args[0]).equals("snek")) {
       File targetFile = new File(args[0]);
       if (targetFile.exists() && targetFile.canRead()) {
         List<Token> tokens = tokenizeSource(targetFile);
@@ -59,8 +59,16 @@ public class Main {
       }
     }
     else {
-      System.err.println("sNEK: Missing file argument!");
+      System.err.println("sNEK: Missing .snek file as argument!");
     }
+  }
+  
+  public static String getFileExtension(String fileName) {
+    int dotLI = fileName.lastIndexOf(".");
+    if (dotLI < 0) {
+      return "";
+    }
+    return fileName.substring(dotLI+1, fileName.length());
   }
   
   /**
