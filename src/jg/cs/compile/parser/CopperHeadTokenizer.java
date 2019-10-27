@@ -122,6 +122,12 @@ public class CopperHeadTokenizer extends Tokenizer {
                                    "set");
         addPattern(pattern);
 
+        pattern = new TokenPattern(CopperHeadConstants.VOID,
+                                   "VOID",
+                                   TokenPattern.STRING_TYPE,
+                                   "void");
+        addPattern(pattern);
+
         pattern = new TokenPattern(CopperHeadConstants.NAME,
                                    "NAME",
                                    TokenPattern.REGEXP_TYPE,

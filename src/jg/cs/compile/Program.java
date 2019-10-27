@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import jg.cs.common.FunctionSignature;
 import jg.cs.compile.errors.DuplicateFunctionException;
 import jg.cs.compile.nodes.Expr;
 import jg.cs.compile.nodes.FunctDefExpr;
@@ -43,7 +44,7 @@ public class Program {
 
   public static Program formProgram(String fileName, List<Expr> exprs) {
     HashMap<FunctionSignature, FunctDefExpr> functionDefs = new HashMap<>();
-    
+        
     for (Expr expr : exprs) {
       if (expr instanceof FunctDefExpr) {
         FunctDefExpr functDef = (FunctDefExpr) expr;

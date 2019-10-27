@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import jg.cs.compile.Type;
+import jg.cs.common.Type;
 import jg.cs.compile.nodes.atoms.Identifier;
 import net.percederberg.grammatica.parser.Token;
 

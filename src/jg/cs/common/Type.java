@@ -1,7 +1,8 @@
-package jg.cs.compile;
+package jg.cs.common;
 
 public enum Type{
   INT, 
   STRING, 
-  BOOL;
+  BOOL,
+  VOID;
 }

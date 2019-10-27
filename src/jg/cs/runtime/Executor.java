@@ -1,4 +1,4 @@
-package jg.cs.compile;
+package jg.cs.runtime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,17 +6,17 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 
 import jg.cs.common.BuiltInFunctions;
 import jg.cs.common.FunctionSignature;
 import jg.cs.common.OperatorKind;
 import jg.cs.common.Type;
+import jg.cs.compile.Program;
 import jg.cs.compile.errors.TypeMismatchException;
 import jg.cs.compile.errors.UnresolvableComponentException;
 import jg.cs.compile.nodes.BinaryOpExpr;
-import jg.cs.compile.nodes.Expr;import jg.cs.compile.nodes.FunctDefExpr;
+import jg.cs.compile.nodes.Expr;
+import jg.cs.compile.nodes.FunctDefExpr;
 import jg.cs.compile.nodes.FunctionCall;
 import jg.cs.compile.nodes.IdenTypeValTuple;
 import jg.cs.compile.nodes.IfExpr;
@@ -28,20 +28,19 @@ import jg.cs.compile.nodes.atoms.Bool;
 import jg.cs.compile.nodes.atoms.Identifier;
 import jg.cs.compile.nodes.atoms.Int;
 import jg.cs.compile.nodes.atoms.Str;
+import jg.cs.runtime.values.Value;
 
-public class TypeChecker {
-
-  private final Program program;
-  private final Set<FunctionSignature> checkedFunctions;
+public class Executor {
   
-  public TypeChecker(Program program) {
+  private final Program program;
+  
+  public Executor(Program program) {
     this.program = program;
-    this.checkedFunctions = new HashSet<>();
   }
   
-  public Type checkType() {    
+  public Value<?> execute(){
     System.out.println("---FMAP: "+program.getFileFunctions());
-    Type latest = null;
+    Value<?> latest = null;
     for (Expr component : program.getExprList()) {
       latest = checkExpr(component, new ArrayList<>(), fwrap(program.getFileFunctions()));
     }   
@@ -366,4 +365,5 @@ public class TypeChecker {
     
     return newEnv;
   }
+  
 }

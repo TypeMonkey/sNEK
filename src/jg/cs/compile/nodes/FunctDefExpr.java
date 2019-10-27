@@ -3,9 +3,9 @@ package jg.cs.compile.nodes;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import jg.cs.compile.FunctionIdentity;
-import jg.cs.compile.FunctionSignature;
-import jg.cs.compile.Type;
+import jg.cs.common.FunctionIdentity;
+import jg.cs.common.FunctionSignature;
+import jg.cs.common.Type;
 import jg.cs.compile.nodes.atoms.Typ;
 import net.percederberg.grammatica.parser.Token;
 

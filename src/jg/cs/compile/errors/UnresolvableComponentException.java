@@ -1,6 +1,6 @@
 package jg.cs.compile.errors;
 
-import jg.cs.compile.FunctionSignature;
+import jg.cs.common.FunctionSignature;
 import jg.cs.compile.nodes.FunctionCall;
 import jg.cs.compile.nodes.atoms.Identifier;
 import net.percederberg.grammatica.parser.Token;

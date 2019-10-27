@@ -1,6 +1,6 @@
 package jg.cs.compile.nodes.atoms;
 
-import jg.cs.compile.OperatorKind;
+import jg.cs.common.OperatorKind;
 import net.percederberg.grammatica.parser.Token;
 
 public class BinaryOperator extends Atom<OperatorKind>{

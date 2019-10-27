@@ -1,7 +1,7 @@
 package jg.cs.compile.errors;
 
-import jg.cs.compile.OperatorKind;
-import jg.cs.compile.Type;
+import jg.cs.common.OperatorKind;
+import jg.cs.common.Type;
 import jg.cs.compile.nodes.BinaryOpExpr;
 import jg.cs.compile.nodes.Expr;
 import jg.cs.compile.nodes.FunctDefExpr;

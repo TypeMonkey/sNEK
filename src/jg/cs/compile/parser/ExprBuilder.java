@@ -114,6 +114,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     actualNodes.push(new Keyword(node));
     return node;
   }
+  
   //Keyword END
 
   //Types BEGIN
@@ -131,6 +132,12 @@ public class ExprBuilder extends CopperHeadAnalyzer{
 
   @Override
   protected Node exitStr(Token node) throws ParseException {
+    actualNodes.push(new Typ(node));
+    return node;
+  }
+  
+  @Override
+  protected Node exitVoid(Token node) throws ParseException {
     actualNodes.push(new Typ(node));
     return node;
   }
@@ -315,7 +322,13 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     while (!exprs.isEmpty()) {
       Expr name = exprs.pollFirst();
       Expr potentialColon = exprs.pollFirst();
-      if (potentialColon == null) {
+      if (name instanceof Typ) {
+        //if name is a keyword, then this function must have no parameters
+        exprs.addFirst(name);
+        exprs.addFirst(potentialColon);
+        break;
+      }
+      else if (potentialColon == null) {
         exprs.addFirst(name);
         break;
       }
@@ -336,7 +349,7 @@ public class ExprBuilder extends CopperHeadAnalyzer{
     
     //Gets rid of the colon keyword
     exprs.pollFirst();
-    
+        
     //function return type
     Typ functionReturn = (Typ) exprs.pollFirst();
     

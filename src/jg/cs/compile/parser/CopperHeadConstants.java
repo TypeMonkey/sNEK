@@ -81,72 +81,77 @@ public interface CopperHeadConstants {
     /**
      * A token identity constant.
      */
-    public static final int NAME = 1014;
+    public static final int VOID = 1014;
 
     /**
      * A token identity constant.
      */
-    public static final int PLUS = 1015;
+    public static final int NAME = 1015;
 
     /**
      * A token identity constant.
      */
-    public static final int MINUS = 1016;
+    public static final int PLUS = 1016;
 
     /**
      * A token identity constant.
      */
-    public static final int MULT = 1017;
+    public static final int MINUS = 1017;
 
     /**
      * A token identity constant.
      */
-    public static final int LESS = 1018;
+    public static final int MULT = 1018;
 
     /**
      * A token identity constant.
      */
-    public static final int GREAT = 1019;
+    public static final int LESS = 1019;
 
     /**
      * A token identity constant.
      */
-    public static final int EQUAL = 1020;
+    public static final int GREAT = 1020;
 
     /**
      * A token identity constant.
      */
-    public static final int NOT_EQ = 1021;
+    public static final int EQUAL = 1021;
 
     /**
      * A token identity constant.
      */
-    public static final int GR_EQ = 1022;
+    public static final int NOT_EQ = 1022;
 
     /**
      * A token identity constant.
      */
-    public static final int LS_EQ = 1023;
+    public static final int GR_EQ = 1023;
 
     /**
      * A token identity constant.
      */
-    public static final int COLON = 1024;
+    public static final int LS_EQ = 1024;
 
     /**
      * A token identity constant.
      */
-    public static final int EXPONENT = 1025;
+    public static final int COLON = 1025;
 
     /**
      * A token identity constant.
      */
-    public static final int OP_PAREN = 1026;
+    public static final int EXPONENT = 1026;
 
     /**
      * A token identity constant.
      */
-    public static final int CL_PAREN = 1027;
+    public static final int OP_PAREN = 1027;
+
+    /**
+     * A token identity constant.
+     */
+    public static final int CL_PAREN = 1028;
 
     /**
      * A production node identity constant.

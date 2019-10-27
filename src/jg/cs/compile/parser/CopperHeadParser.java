@@ -107,6 +107,16 @@ public class CopperHeadParser extends RecursiveDescentParser {
     private static final int SUBPRODUCTION_17 = 3017;
 
     /**
+     * A generated production node identity constant.
+     */
+    private static final int SUBPRODUCTION_18 = 3018;
+
+    /**
+     * A generated production node identity constant.
+     */
+    private static final int SUBPRODUCTION_19 = 3019;
+
+    /**
      * Creates a new parser with a default analyzer.
      *
      * @param in             the input stream to read from
@@ -181,9 +191,9 @@ public class CopperHeadParser extends RecursiveDescentParser {
         alt = new ProductionPatternAlternative();
         alt.addToken(CopperHeadConstants.DEF, 1, 1);
         alt.addToken(CopperHeadConstants.NAME, 1, 1);
-        alt.addProduction(SUBPRODUCTION_11, 1, -1);
+        alt.addProduction(SUBPRODUCTION_12, 1, 1);
         alt.addToken(CopperHeadConstants.COLON, 1, 1);
-        alt.addProduction(CopperHeadConstants.TYPE, 1, 1);
+        alt.addProduction(SUBPRODUCTION_13, 1, 1);
         alt.addProduction(CopperHeadConstants.EXPR, 1, -1);
         pattern.addAlternative(alt);
         addPattern(pattern);
@@ -193,7 +203,7 @@ public class CopperHeadParser extends RecursiveDescentParser {
         alt = new ProductionPatternAlternative();
         alt.addToken(CopperHeadConstants.LET, 1, 1);
         alt.addToken(CopperHeadConstants.OP_PAREN, 1, 1);
-        alt.addProduction(SUBPRODUCTION_13, 1, -1);
+        alt.addProduction(SUBPRODUCTION_15, 1, -1);
         alt.addToken(CopperHeadConstants.CL_PAREN, 1, 1);
         alt.addProduction(CopperHeadConstants.EXPR, 1, -1);
         pattern.addAlternative(alt);
@@ -212,7 +222,7 @@ public class CopperHeadParser extends RecursiveDescentParser {
         pattern = new ProductionPattern(CopperHeadConstants.BIN_OP,
                                         "binOp");
         alt = new ProductionPatternAlternative();
-        alt.addProduction(SUBPRODUCTION_14, 1, 1);
+        alt.addProduction(SUBPRODUCTION_16, 1, 1);
         alt.addProduction(CopperHeadConstants.EXPR, 1, 1);
         alt.addProduction(CopperHeadConstants.EXPR, 1, 1);
         pattern.addAlternative(alt);
@@ -231,7 +241,7 @@ public class CopperHeadParser extends RecursiveDescentParser {
                                         "funcCall");
         alt = new ProductionPatternAlternative();
         alt.addToken(CopperHeadConstants.NAME, 1, 1);
-        alt.addProduction(CopperHeadConstants.EXPR, 1, -1);
+        alt.addProduction(CopperHeadConstants.EXPR, 0, -1);
         pattern.addAlternative(alt);
         addPattern(pattern);
 
@@ -247,14 +257,14 @@ public class CopperHeadParser extends RecursiveDescentParser {
         pattern = new ProductionPattern(CopperHeadConstants.TYPE,
                                         "type");
         alt = new ProductionPatternAlternative();
-        alt.addProduction(SUBPRODUCTION_15, 1, 1);
+        alt.addProduction(SUBPRODUCTION_17, 1, 1);
         pattern.addAlternative(alt);
         addPattern(pattern);
 
         pattern = new ProductionPattern(CopperHeadConstants.ATOM,
                                         "atom");
         alt = new ProductionPatternAlternative();
-        alt.addProduction(SUBPRODUCTION_17, 1, 1);
+        alt.addProduction(SUBPRODUCTION_19, 1, 1);
         pattern.addAlternative(alt);
         addPattern(pattern);
 
@@ -389,9 +399,10 @@ public class CopperHeadParser extends RecursiveDescentParser {
                                         "Subproduction12");
         pattern.setSynthetic(true);
         alt = new ProductionPatternAlternative();
-        alt.addToken(CopperHeadConstants.NAME, 1, 1);
-        alt.addToken(CopperHeadConstants.COLON, 1, 1);
-        alt.addProduction(CopperHeadConstants.TYPE, 1, 1);
+        alt.addProduction(SUBPRODUCTION_11, 1, -1);
+        pattern.addAlternative(alt);
+        alt = new ProductionPatternAlternative();
+        alt.addToken(CopperHeadConstants.VOID, 1, 1);
         pattern.addAlternative(alt);
         addPattern(pattern);
 
@@ -399,15 +410,36 @@ public class CopperHeadParser extends RecursiveDescentParser {
                                         "Subproduction13");
         pattern.setSynthetic(true);
         alt = new ProductionPatternAlternative();
-        alt.addToken(CopperHeadConstants.OP_PAREN, 1, 1);
-        alt.addProduction(SUBPRODUCTION_12, 1, 1);
-        alt.addProduction(CopperHeadConstants.EXPR, 1, 1);
-        alt.addToken(CopperHeadConstants.CL_PAREN, 1, 1);
+        alt.addProduction(CopperHeadConstants.TYPE, 1, 1);
+        pattern.addAlternative(alt);
+        alt = new ProductionPatternAlternative();
+        alt.addToken(CopperHeadConstants.VOID, 1, 1);
         pattern.addAlternative(alt);
         addPattern(pattern);
 
         pattern = new ProductionPattern(SUBPRODUCTION_14,
                                         "Subproduction14");
+        pattern.setSynthetic(true);
+        alt = new ProductionPatternAlternative();
+        alt.addToken(CopperHeadConstants.NAME, 1, 1);
+        alt.addToken(CopperHeadConstants.COLON, 1, 1);
+        alt.addProduction(CopperHeadConstants.TYPE, 1, 1);
+        pattern.addAlternative(alt);
+        addPattern(pattern);
+
+        pattern = new ProductionPattern(SUBPRODUCTION_15,
+                                        "Subproduction15");
+        pattern.setSynthetic(true);
+        alt = new ProductionPatternAlternative();
+        alt.addToken(CopperHeadConstants.OP_PAREN, 1, 1);
+        alt.addProduction(SUBPRODUCTION_14, 1, 1);
+        alt.addProduction(CopperHeadConstants.EXPR, 1, 1);
+        alt.addToken(CopperHeadConstants.CL_PAREN, 1, 1);
+        pattern.addAlternative(alt);
+        addPattern(pattern);
+
+        pattern = new ProductionPattern(SUBPRODUCTION_16,
+                                        "Subproduction16");
         pattern.setSynthetic(true);
         alt = new ProductionPatternAlternative();
         alt.addToken(CopperHeadConstants.PLUS, 1, 1);
@@ -429,8 +461,8 @@ public class CopperHeadParser extends RecursiveDescentParser {
         pattern.addAlternative(alt);
         addPattern(pattern);
 
-        pattern = new ProductionPattern(SUBPRODUCTION_15,
-                                        "Subproduction15");
+        pattern = new ProductionPattern(SUBPRODUCTION_17,
+                                        "Subproduction17");
         pattern.setSynthetic(true);
         alt = new ProductionPatternAlternative();
         alt.addToken(CopperHeadConstants.INT, 1, 1);
@@ -443,8 +475,8 @@ public class CopperHeadParser extends RecursiveDescentParser {
         pattern.addAlternative(alt);
         addPattern(pattern);
 
-        pattern = new ProductionPattern(SUBPRODUCTION_16,
-                                        "Subproduction16");
+        pattern = new ProductionPattern(SUBPRODUCTION_18,
+                                        "Subproduction18");
         pattern.setSynthetic(true);
         alt = new ProductionPatternAlternative();
         alt.addToken(CopperHeadConstants.MINUS, 0, 1);
@@ -452,11 +484,11 @@ public class CopperHeadParser extends RecursiveDescentParser {
         pattern.addAlternative(alt);
         addPattern(pattern);
 
-        pattern = new ProductionPattern(SUBPRODUCTION_17,
-                                        "Subproduction17");
+        pattern = new ProductionPattern(SUBPRODUCTION_19,
+                                        "Subproduction19");
         pattern.setSynthetic(true);
         alt = new ProductionPatternAlternative();
-        alt.addProduction(SUBPRODUCTION_16, 1, 1);
+        alt.addProduction(SUBPRODUCTION_18, 1, 1);
         pattern.addAlternative(alt);
         alt = new ProductionPatternAlternative();
         alt.addToken(CopperHeadConstants.FALSE, 1, 1);

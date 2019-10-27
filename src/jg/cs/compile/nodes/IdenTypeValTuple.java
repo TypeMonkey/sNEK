@@ -1,6 +1,6 @@
 package jg.cs.compile.nodes;
 
-import jg.cs.compile.Type;
+import jg.cs.common.Type;
 import jg.cs.compile.nodes.atoms.Identifier;
 
 public class IdenTypeValTuple {

@@ -1,4 +1,4 @@
-package jg.cs.compile;
+package jg.cs.common;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -8,7 +8,7 @@ public class FunctionSignature {
   private final String name;
   private final Type [] parameterTypes;
   
-  public FunctionSignature(String name, Type [] parameterTypes) {
+  public FunctionSignature(String name, Type ... parameterTypes) {
     this.name = name;
     this.parameterTypes = parameterTypes;
   }

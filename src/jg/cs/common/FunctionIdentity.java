@@ -1,4 +1,4 @@
-package jg.cs.compile;
+package jg.cs.common;
 
 import java.util.Arrays;
 import java.util.Objects;

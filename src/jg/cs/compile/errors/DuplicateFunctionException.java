@@ -1,6 +1,6 @@
 package jg.cs.compile.errors;
 
-import jg.cs.compile.FunctionSignature;
+import jg.cs.common.FunctionSignature;
 import net.percederberg.grammatica.parser.Token;
 
 public class DuplicateFunctionException extends RuntimeException{
