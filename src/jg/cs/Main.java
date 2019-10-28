@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import jg.cs.compile.Program;
 import jg.cs.compile.TypeChecker;
@@ -50,8 +52,6 @@ public class Main {
           System.exit(-1);
         }
 
-        System.out.println("sNEK Interpreter v1.0");
-        System.out.println("-------------PARSING------------");
         List<Expr> components = null;
         try {
           components = parse(tokens);
@@ -68,11 +68,11 @@ public class Main {
         Program program = Program.formProgram(targetFile.getName(), components);
         //System.out.println(components);
 
-        System.out.println("-------------TYPE CHECKING-------------");
+        //System.out.println("-------------TYPE CHECKING-------------");
         TypeChecker typeChecker = new TypeChecker(program);
         typeChecker.checkType();
         
-        System.out.println("-------------EXECUTING-------------");
+        //System.out.println("-------------EXECUTING-------------");
         Executor executor = new Executor(program);
         try {
           Value<?> result = executor.execute();
