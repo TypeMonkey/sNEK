@@ -28,7 +28,7 @@ sNEK is largely based off a continuing programming assignment in class I'm curre
 
 Though I have experience with programming language construction, both the content and Professor Politz have offered much needed insight into this weirdly attractive field. It has been both a painful, yet rewarding, experience so far and I'm excited to see what else this class has to offer.
 
-**Note: ** sNEK is not a sponsored project by the staff of CSE 131. This is merely an independent project developed by a student of CSE 131 on their own time, without prior knowledge or communication with the staff of CSE 131. If you have any questions or concerns regarding sNEK, please [contact](jguaro@ucsd.edu) the creator directly.
+**Note:** sNEK is not a sponsored project by the staff of CSE 131. This is merely an independent project developed by a student of CSE 131 on their own time, without prior knowledge or communication with the staff of CSE 131. If you have any questions or concerns regarding sNEK, please [contact](jguaro@ucsd.edu) the creator directly.
 
 ### Credits and Thanks
 This wouldn't have been possible without CSE 131,  Professor Politz and his TAs. 
