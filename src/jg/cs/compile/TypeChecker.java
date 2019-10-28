@@ -40,7 +40,7 @@ public class TypeChecker {
   }
   
   public Type checkType() {    
-    System.out.println("---FMAP: "+program.getFileFunctions());
+    //System.out.println("---FMAP: "+program.getFileFunctions());
     Type latest = null;
     for (Expr component : program.getExprList()) {
       latest = checkExpr(component, new ArrayList<>(), fwrap(program.getFileFunctions()));
@@ -52,7 +52,7 @@ public class TypeChecker {
   private Type checkExpr(Expr expr, 
       List<Map<String, IdenTypeValTuple>> others, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    System.out.println("TARGET: "+expr);
+    //System.out.println("TARGET: "+expr);
     if (expr instanceof Int) {
       return Type.INT;
     }
@@ -67,7 +67,7 @@ public class TypeChecker {
     }
     else if (expr instanceof FunctDefExpr) {
       FunctDefExpr functDef = (FunctDefExpr) expr;
-      System.out.println("--------CHECKED: "+checkedFunctions);
+      //System.out.println("--------CHECKED: "+checkedFunctions);
       if (checkedFunctions.contains(functDef.getIdentity().getSignature())) {
         return functDef.getReturnType().getActualValue();
       }
@@ -92,53 +92,67 @@ public class TypeChecker {
       return checkWhileLoop((WhileExpr) expr, others, fenv);
     }
     
-    System.out.println("unknown? "+expr.getClass());
+    //System.out.println("unknown? "+expr.getClass());
     return null;
   }
   
   private Type checkBinaryOperation(BinaryOpExpr binaryOpExpr, 
       List<Map<String, IdenTypeValTuple>> others, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
-    System.out.println("----BIN OP: "+binaryOpExpr);
+    //System.out.println("----BIN OP: "+binaryOpExpr);
     Type leftType = checkExpr(binaryOpExpr.getLeft(), others, fenv);
     Type rightType = checkExpr(binaryOpExpr.getRight(), others, fenv);
     
     BinaryOperator operator = binaryOpExpr.getOperator();
     OperatorKind operatorKind = operator.getActualValue();
     
-    //arithmetic operators
-    HashSet<OperatorKind> arithOps = new HashSet<OperatorKind>();
-    arithOps.addAll(Arrays.asList(OperatorKind.PLUS, OperatorKind.MINUS, OperatorKind.TIMES));
-    
-    if (arithOps.contains(operatorKind)) {
-      if (leftType != Type.INT) {
-        System.out.println("----LEFT TYPE: "+leftType);
-        throw new TypeMismatchException(operatorKind, 
-            binaryOpExpr.getLeft(), leftType, Type.INT, program.getFileName());
-      }
-      else if (rightType != Type.INT) {
-        throw new TypeMismatchException(operatorKind, 
-            binaryOpExpr.getRight(), rightType, Type.INT, program.getFileName());
-      }
-      else {
-        return Type.INT;
-      }
-    }
-    else if (operatorKind == OperatorKind.EQUAL) {
+    if (operatorKind == OperatorKind.EQUAL) {
       return Type.BOOL;
     }
-    else {
-      //comparison operator
-      if (leftType != Type.INT) {
+    else if (operatorKind == OperatorKind.PLUS) {
+      if (leftType == Type.INT && rightType == Type.INT) {
+        return Type.INT;
+      }
+      else if (leftType == Type.STRING || rightType == Type.STRING) {
+        return Type.STRING;
+      }
+      else {
         throw new TypeMismatchException(operatorKind, 
             binaryOpExpr.getLeft(), leftType, Type.INT, program.getFileName());
       }
-      else if (rightType != Type.INT) {
-        throw new TypeMismatchException(operatorKind, 
-            binaryOpExpr.getRight(), rightType, Type.INT, program.getFileName());
+    }
+    else {
+      //arithmetic operators
+      HashSet<OperatorKind> arithOps = new HashSet<OperatorKind>();
+      arithOps.addAll(Arrays.asList(OperatorKind.MINUS, OperatorKind.TIMES));
+      
+      if (arithOps.contains(operatorKind)) {
+        if (leftType != Type.INT) {
+          //System.out.println("----LEFT TYPE: "+leftType);
+          throw new TypeMismatchException(operatorKind, 
+              binaryOpExpr.getLeft(), leftType, Type.INT, program.getFileName());
+        }
+        else if (rightType != Type.INT) {
+          throw new TypeMismatchException(operatorKind, 
+              binaryOpExpr.getRight(), rightType, Type.INT, program.getFileName());
+        }
+        else {
+          return Type.INT;
+        }
       }
       else {
-        return Type.BOOL;
+        //comparison operator
+        if (leftType != Type.INT) {
+          throw new TypeMismatchException(operatorKind, 
+              binaryOpExpr.getLeft(), leftType, Type.INT, program.getFileName());
+        }
+        else if (rightType != Type.INT) {
+          throw new TypeMismatchException(operatorKind, 
+              binaryOpExpr.getRight(), rightType, Type.INT, program.getFileName());
+        }
+        else {
+          return Type.BOOL;
+        }
       }
     }
   }
@@ -147,12 +161,12 @@ public class TypeChecker {
       List<Map<String, IdenTypeValTuple>> others, 
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
     
-    System.out.println("****** FUN CALL "+call);
+    //System.out.println("****** FUN CALL "+call);
     Type [] argTypes = new Type[call.getArgCount()];
     int i = 0;
     for(Expr argument : call.getArguments()) {
       argTypes[i] = checkExpr(argument, others, fenv);
-      System.out.println("    ---> ARG["+i+"]:  "+argument);
+      //System.out.println("    ---> ARG["+i+"]:  "+argument);
       i++;
     }
     
@@ -163,7 +177,7 @@ public class TypeChecker {
     for (Map<FunctionSignature, FunctDefExpr> fmap : fenv) {
       if (fmap.containsKey(signature)) {
         Type retType = fmap.get(signature).getReturnType().getActualValue();
-        System.out.println(" --->!!! FOUND TYPE: "+retType);
+        //System.out.println(" --->!!! FOUND TYPE: "+retType);
         return retType;
       }
     }
@@ -173,8 +187,8 @@ public class TypeChecker {
       return BuiltInFunctions.BUILT_IN_MAP.get(signature).getIdentity().getReturnType();
     }
     
-    System.out.println("FINDING: "+signature);
-    System.out.println("  MAPS: "+fenv);
+    //System.out.println("FINDING: "+signature);
+    //System.out.println("  MAPS: "+fenv);
     throw new UnresolvableComponentException(signature, 
         call.getLeadToken(), 
         program.getFileName());
@@ -218,21 +232,21 @@ public class TypeChecker {
     LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
     
     //if last statement is func def, throw error
-    Expr latest = null;
+    FunctDefExpr functDefExpr = null;
     for(Expr statement : whileExpr.getExpressions()) {
       if (statement instanceof FunctDefExpr) {
-        FunctDefExpr functDefExpr = (FunctDefExpr) statement;
+        functDefExpr = (FunctDefExpr) statement;
         latestType = checkFuncDef(functDefExpr, others, fconcatToFront(localFuncMap, fenv));
         localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
       }
       else {
-        latest = statement;
         latestType = checkExpr(statement, others, fenv);
+        functDefExpr = null;
       }
     }
     
-    if (latest instanceof FunctDefExpr) {
-      throw new TypeMismatchException((FunctDefExpr) latest, program.getFileName());
+    if (functDefExpr != null) {
+      throw new TypeMismatchException(functDefExpr, program.getFileName());
     }
     
     return latestType;
@@ -243,7 +257,7 @@ public class TypeChecker {
       List<Map<FunctionSignature, FunctDefExpr>> fenv) {
     LinkedHashMap<String, IdenTypeValTuple> localEnv = new LinkedHashMap<>();
    
-    System.out.println("---LET: "+expr.getExpressions());
+    //System.out.println("---LET: "+expr.getExpressions());
     
     //load all local variables. At each local variable, evaluate the type
     //of its value with the current localEnv
@@ -256,23 +270,29 @@ public class TypeChecker {
       
       localEnv.put(var.getIdentifier().getActualValue(), var);
     }
-    System.out.println("----DONE CHECKING LET");
+    //System.out.println("----DONE CHECKING LET");
     //now, check all statements
     Type latestType = null;
     
     LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
     
+    FunctDefExpr functDefExpr = null;
+    
     for(Expr statement : expr.getExpressions()) {
       if (statement instanceof FunctDefExpr) {
-        FunctDefExpr functDefExpr = (FunctDefExpr) statement;
+        functDefExpr = (FunctDefExpr) statement;
         latestType = checkFuncDef(functDefExpr, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
         localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
       }
       else {
         latestType = checkExpr(statement, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
+        functDefExpr = null;
       }
     }
     
+    if (functDefExpr != null) {
+      throw new TypeMismatchException(functDefExpr, program.getFileName());
+    }
     return latestType;
   }
   
@@ -292,11 +312,12 @@ public class TypeChecker {
     LinkedHashMap<FunctionSignature, FunctDefExpr> localFuncMap = new LinkedHashMap<>();
     
     Type lastType = null;
+        
     for(Expr statement : expr.getExpressionsExprs()) {
       if (statement instanceof FunctDefExpr) {
-        FunctDefExpr functDefExpr = (FunctDefExpr) statement;
-        localFuncMap.put(functDefExpr.getIdentity().getSignature(), functDefExpr);
-        lastType = checkFuncDef(functDefExpr, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
+        FunctDefExpr latestFuncDef = (FunctDefExpr) statement;
+        localFuncMap.put(latestFuncDef.getIdentity().getSignature(), latestFuncDef);
+        lastType = checkFuncDef(latestFuncDef, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));
       }
       else {
         lastType = checkExpr(statement, concatToFront(localEnv, others), fconcatToFront(localFuncMap, fenv));

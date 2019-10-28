@@ -18,6 +18,7 @@ import jg.cs.common.Type;
  *  - isBool : ->  (int or bool or str) >>> bool
  *  - isStr : ->  (int or bool or str) >>> bool
  *  - type : -> (int or boolor str) >>> str (returns the type name as a string)
+ *  - len : -> string >>> int (returns size of string)
  * @author Jose
  *
  */
@@ -47,6 +48,11 @@ public enum BuiltInFunctions {
    * Returns an integer with decremented by one
    */
   DEC(new FunctionIdentity(new FunctionSignature("dec", Type.INT), Type.INT)),
+  
+  /**
+   * Returns the size of a string
+   */
+  LEN(new FunctionIdentity(new FunctionSignature("len", Type.STRING), Type.INT)),
   
   /**
    * Returns the string representation of an integer

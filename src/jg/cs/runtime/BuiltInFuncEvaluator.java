@@ -27,6 +27,9 @@ public final class BuiltInFuncEvaluator {
     else if (function == BuiltInFunctions.DEC) {
       return dec((IntValue) args[0]);
     }
+    else if (function == BuiltInFunctions.LEN) {
+      return len((StringValue) args[0]);
+    }
     else if(function.getIdentity().getSignature().getName().equals("isInt")){
       return isInt(args[0]);
     }
@@ -42,6 +45,10 @@ public final class BuiltInFuncEvaluator {
     else {
       return type(args[0]);
     }
+  }
+  
+  public static IntValue len(StringValue value) {
+    return new IntValue((long) value.getActualValue().length());
   }
   
   public static StringValue input() {

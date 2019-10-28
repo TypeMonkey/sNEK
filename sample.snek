@@ -18,3 +18,5 @@
 )
 (println (toStr (iter 5)) )
 (println (toStr (sum 5)) )
+(println (toStr (- -9223372036854775808 -9223372036854775808)))
+(println (+ 'hello' 5))

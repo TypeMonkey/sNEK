@@ -1,8 +1,10 @@
 package jg.cs;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import jg.cs.compile.parser.CopperHeadParser;
 import jg.cs.compile.parser.CopperHeadTokenizer;
 import jg.cs.compile.parser.ExprBuilder;
 import jg.cs.runtime.Executor;
+import jg.cs.runtime.errors.ExecException;
 import jg.cs.runtime.values.Value;
 import net.percederberg.grammatica.parser.ParseException;
 import net.percederberg.grammatica.parser.ParserCreationException;
@@ -22,6 +25,10 @@ import net.percederberg.grammatica.parser.Tokenizer;
 
 public class Main {
 
+  /**
+   * Main driver method for the sNEK interpreter
+   * @param args - the string arguments to the interpreter
+   */
   public static void main(String[] args) {
     if (args.length == 1 && getFileExtension(args[0]).equals("snek")) {
       File targetFile = new File(args[0]);
@@ -58,16 +65,22 @@ public class Main {
           System.exit(-1);
         }
 
-        Program program = Program.formProgram("testProg", components);
+        Program program = Program.formProgram(targetFile.getName(), components);
         //System.out.println(components);
 
         System.out.println("-------------TYPE CHECKING-------------");
         TypeChecker typeChecker = new TypeChecker(program);
-        //System.out.println("RESULT: "+typeChecker.checkType());
+        typeChecker.checkType();
         
         System.out.println("-------------EXECUTING-------------");
         Executor executor = new Executor(program);
-        Value<?> result = executor.execute();
+        try {
+          Value<?> result = executor.execute();
+        } catch (ExecException e) {
+          System.err.println(e.getMessage());
+          System.err.println("Exiting......");
+          System.exit(-1);
+        }
         
         //System.out.println(" -----> FINAL: "+result);
       }
@@ -80,6 +93,11 @@ public class Main {
     }
   }
   
+  /**
+   * Returns the extension of a file, without the "."
+   * @param fileName - the name of the file
+   * @return the file extension, or the empty string if no extension can't be found
+   */
   public static String getFileExtension(String fileName) {
     int dotLI = fileName.lastIndexOf(".");
     if (dotLI < 0) {
@@ -97,6 +115,18 @@ public class Main {
    */
   public static List<Token> tokenizeSource(File source) throws ParseException, FileNotFoundException{
     try {
+      ArrayList<String> nonCommentLines = new ArrayList<String>();
+      BufferedReader reader = new BufferedReader(new FileReader(source));
+      
+      String temp = null;
+      try {
+        while ((temp = reader.readLine()) != null) {
+          nonCommentLines.add(temp);
+        }
+      } catch (IOException e) {
+        System.err.println("sNEK: IO Error encountered while reading "+source.getName());
+      }
+      
       Tokenizer tokenizer = new CopperHeadTokenizer(new FileReader(source));
       ArrayList<Token> allTokens = new ArrayList<>();
 

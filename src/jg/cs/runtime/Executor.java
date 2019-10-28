@@ -28,6 +28,8 @@ import jg.cs.compile.nodes.atoms.Bool;
 import jg.cs.compile.nodes.atoms.Identifier;
 import jg.cs.compile.nodes.atoms.Int;
 import jg.cs.compile.nodes.atoms.Str;
+import jg.cs.runtime.errors.ExecException;
+import jg.cs.runtime.errors.OverflowException;
 import jg.cs.runtime.values.BoolValue;
 import jg.cs.runtime.values.FunctionValue;
 import jg.cs.runtime.values.IntValue;
@@ -56,7 +58,7 @@ public class Executor {
   
   private Value evalExpr(Expr expr, 
       List<Map<String, Value<?>>> env, 
-      List<Map<FunctionSignature, FunctDefExpr>> fenv) {
+      List<Map<FunctionSignature, FunctDefExpr>> fenv) throws ExecException{
     //System.out.println("TARGET: "+expr);
     if (expr instanceof Int) {
       //System.out.println(" FOR INT "+((Int) expr).getActualValue());
@@ -115,18 +117,41 @@ public class Executor {
     if (operatorKind == OperatorKind.EQUAL) {
       return new BoolValue(leftValue.getActualValue().equals(rightValue.getActualValue()));
     }
+    else if (operatorKind == OperatorKind.PLUS) {
+      if (leftValue.getValueType() == Type.STRING || rightValue.getValueType() == Type.STRING) {
+        return new StringValue(leftValue.getActualValue().toString() + rightValue.getActualValue().toString());
+      }
+      else {
+        IntValue intLeft = (IntValue) leftValue;
+        IntValue intRight = (IntValue) rightValue;
+
+        try {
+          long sum = Math.addExact(intLeft.getActualValue(), intRight.getActualValue());
+          return new IntValue(sum);
+        } catch (Exception e) {
+          throw new OverflowException(binaryOpExpr.getOperator(), program.getFileName());
+        }         
+      }
+    }
     else {
       IntValue intLeft = (IntValue) leftValue;
       IntValue intRight = (IntValue) rightValue;
 
-      if (operatorKind == OperatorKind.PLUS) {
-        return new IntValue(intLeft.getActualValue() + intRight.getActualValue());
-      }
-      else if (operatorKind == OperatorKind.MINUS) {
-        return new IntValue(intLeft.getActualValue() - intRight.getActualValue());
+      if (operatorKind == OperatorKind.MINUS) {
+        try {
+          long sum = Math.subtractExact(intLeft.getActualValue(), intRight.getActualValue());
+          return new IntValue(sum);
+        } catch (Exception e) {
+          throw new OverflowException(binaryOpExpr.getOperator(), program.getFileName());
+        }
       }
       else if (operatorKind == OperatorKind.TIMES) {
-        return new IntValue(intLeft.getActualValue() * intRight.getActualValue());
+        try {
+          long sum = Math.multiplyExact(intLeft.getActualValue(), intRight.getActualValue());
+          return new IntValue(sum);
+        } catch (Exception e) {
+          throw new OverflowException(binaryOpExpr.getOperator(), program.getFileName());
+        }
       }
       else if (operatorKind == OperatorKind.LESS) {
         return new BoolValue(intLeft.getActualValue() < intRight.getActualValue());
