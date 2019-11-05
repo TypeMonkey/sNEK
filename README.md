@@ -1,7 +1,7 @@
 # sNEK 
 _A statically typed , s-expression based meta language_
 
-`snek sourceFile.snek`
+`java -jar snek.jar sourceFile.snek`
 
 
 ### Features
